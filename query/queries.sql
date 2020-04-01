@@ -40,7 +40,7 @@ CREATE TABLE stops
 CREATE TABLE routes
 (
     route_id         VARCHAR(255) NOT NULL PRIMARY KEY,
-    agency_id        VARCHAR(255),
+    agency_id        VARCHAR(255) REFERENCES agency(agency_id),
     route_type       VARCHAR(255),
     route_short_name VARCHAR(255),
     route_long_name  VARCHAR(255),
@@ -57,10 +57,10 @@ CREATE INDEX stops_geom ON stops USING GIST (geom);
 -- name: create-table-stop_times
 CREATE TABLE stop_times
 (
-    trip_id             VARCHAR(255) NOT NULL,
+    trip_id             VARCHAR(255) REFERENCES trips(trip_id),
     arrival_time        VARCHAR(8)   NOT NULL,
     departure_time      VARCHAR(8)   NOT NULL,
-    stop_id             VARCHAR(255) NOT NULL,
+    stop_id             VARCHAR(255) REFERENCES stops(stop_id),
     stop_sequence       INTEGER      NOT NULL,
     stop_headsign       VARCHAR(255),
     pickup_type         SMALLINT CHECK (pickup_type BETWEEN 0 AND 3),
@@ -76,7 +76,7 @@ COMMENT ON COLUMN stop_times.timepoint IS '0 times are considered approximate, 1
 -- name: create-table-trips
 CREATE TABLE trips
 (
-    route_id              VARCHAR(255) NOT NULL,
+    route_id              VARCHAR(255) references routes(route_id),
     service_id            VARCHAR(255) NOT NULL,
     trip_id               VARCHAR(255) NOT NULL PRIMARY KEY,
     trip_headsign         VARCHAR(255),

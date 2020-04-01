@@ -45,11 +45,11 @@ func (r *Repository) populateTable(tableName, filePath string, geom bool) error 
 		return err
 	}
 
-	err = r.dropTable(tx, tableName)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	//err = r.dropTable(tx, tableName)
+	//if err != nil {
+	//	tx.Rollback()
+	//	return err
+	//}
 
 	err = r.createTable(tx, tableName)
 	if err != nil {
@@ -126,9 +126,9 @@ func (r *Repository) createTable(tx *sql.Tx, tableName string) error {
 	return r.runQuery(tx, queries[goyesql.Tag("create-table-"+tableName)])
 }
 
-func (r *Repository) dropTable(tx *sql.Tx, tableName string) error {
-	return r.runQuery(tx, fmt.Sprintf(queries["drop-table"], tableName))
-}
+//func (r *Repository) dropTable(tx *sql.Tx, tableName string) error {
+//	return r.runQuery(tx, fmt.Sprintf(queries["drop-table"], tableName))
+//}
 
 func (r *Repository) loadTable(tx *sql.Tx, tableName string, rows [][]string) error {
 	if len(rows) < 1 {
