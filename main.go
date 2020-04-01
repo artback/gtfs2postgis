@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"path"
-	"runtime"
-
 	"github.com/fdefabricio/gtfs2postgis/config"
 	"github.com/fdefabricio/gtfs2postgis/query"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"os"
+	"path"
+	"runtime"
 )
 
 var (
@@ -32,23 +31,46 @@ func main() {
 	}
 	dir := path.Dir(filename)
 
+	if err := reader.DownloadFile("gtfs.zip", "https://transitfeeds.com/p/trafiklab/50/latest/download"); err != nil {
+		panic(err)
+	}
+	Unzip("gtfs.zip", "./gtfs")
+
 	err := repo.Connect(conf.Database)
 	if err != nil {
 		panic(err)
 	}
 
-	err = repo.PopulateTableGeom("stops", fmt.Sprintf("%s/gtfs_bhtransit/stops.txt", dir))
+	err = repo.PopulateTableGeom("agency", fmt.Sprintf("%s/gtfs/agency.txt", dir))
+	if err != nil {
+		panic(err)
+	}
+	err = repo.PopulateTableGeom("calendar_dates", fmt.Sprintf("%s/gtfs/calendar_dates.txt", dir))
+	if err != nil {
+		panic(err)
+	}
+	err = repo.PopulateTableGeom("routes", fmt.Sprintf("%s/gtfs/routes.txt", dir))
+	if err != nil {
+		panic(err)
+	}
+	err = repo.PopulateTableGeom("stops", fmt.Sprintf("%s/gtfs/stops.txt", dir))
 	if err != nil {
 		panic(err)
 	}
 
-	err = repo.PopulateTable("trips", fmt.Sprintf("%s/gtfs_bhtransit/trips.txt", dir))
+	err = repo.PopulateTable("trips", fmt.Sprintf("%s/gtfs/trips.txt", dir))
 	if err != nil {
 		panic(err)
 	}
 
-	err = repo.PopulateTable("stop_times", fmt.Sprintf("%s/gtfs_bhtransit/stop_times.txt", dir))
+	err = repo.PopulateTable("stop_times", fmt.Sprintf("%s/gtfs/stop_times.txt", dir))
 	if err != nil {
 		panic(err)
 	}
+	err = os.RemoveAll("./gtfs")
+	err = os.Remove("./gtfs.zip")
+	if err != nil {
+		panic(err)
+	}
+
 }
