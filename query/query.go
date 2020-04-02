@@ -4,13 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/artback/gtfs2postgis/config"
+	"github.com/artback/gtfs2postgis/reader"
+	_ "github.com/lib/pq"
+	"github.com/nleof/goyesql"
 	"strconv"
 	"strings"
-
-	"github.com/fdefabricio/gtfs2postgis/config"
-	"github.com/fdefabricio/gtfs2postgis/reader"
-	"github.com/lib/pq"
-	"github.com/nleof/goyesql"
 )
 
 type Repository struct{ db *sql.DB }
@@ -44,12 +43,6 @@ func (r *Repository) populateTable(tableName, filePath string, geom bool) error 
 	if err != nil {
 		return err
 	}
-
-	//err = r.dropTable(tx, tableName)
-	//if err != nil {
-	//	tx.Rollback()
-	//	return err
-	//}
 
 	err = r.createTable(tx, tableName)
 	if err != nil {
@@ -88,9 +81,18 @@ func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) err
 	_, err := tx.Exec(query, args...)
 	return err
 }
+func CopyIn(table string, columns ...string) string {
+	stmt := "COPY tmp_table FROM STDIN"
+	return stmt
+}
+
+func createTemptable(table string) string {
+	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table + " WITH NO DATA"
+}
 
 func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, rows [][]string) error {
-	stmt, err := tx.Prepare(pq.CopyIn(tableName, header...))
+	_, err := tx.Exec(createTemptable(tableName))
+	stmt, err := tx.Prepare(CopyIn(tableName, header...))
 	if err != nil {
 		return err
 	}
@@ -126,10 +128,6 @@ func (r *Repository) createTable(tx *sql.Tx, tableName string) error {
 	return r.runQuery(tx, queries[goyesql.Tag("create-table-"+tableName)])
 }
 
-//func (r *Repository) dropTable(tx *sql.Tx, tableName string) error {
-//	return r.runQuery(tx, fmt.Sprintf(queries["drop-table"], tableName))
-//}
-
 func (r *Repository) loadTable(tx *sql.Tx, tableName string, rows [][]string) error {
 	if len(rows) < 1 {
 		return errors.New(fmt.Sprintf("load %s table: no records found in the file", tableName))
@@ -151,7 +149,7 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	}
 	arg = strings.TrimSpace(arg)
 	switch column {
-	case "stop_lat", "stop_lon":
+	case "stop_lat", "":
 		return strconv.ParseFloat(arg, 8)
 	case "bikes_allowed", "location_type", "wheelchair_accessible", "wheelchair_boarding":
 		return strconv.Atoi(arg)

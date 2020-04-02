@@ -3,8 +3,8 @@ package main
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/fdefabricio/gtfs2postgis/config"
-	"github.com/fdefabricio/gtfs2postgis/query"
+	"github.com/artback/gtfs2postgis/config"
+	"github.com/artback/gtfs2postgis/query"
 	"io"
 	"net/http"
 	"os"

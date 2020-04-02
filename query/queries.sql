@@ -1,5 +1,5 @@
 -- name: create-table-agency
-CREATE TABLE agency
+CREATE TABLE IF NOT EXISTS agency
 (
     agency_id       VARCHAR(255) NOT NULL PRIMARY KEY,
     agency_name     VARCHAR(255),
@@ -9,7 +9,7 @@ CREATE TABLE agency
 );
 
 -- name: create-table-calendar_dates
-CREATE TABLE calendar_dates
+CREATE TABLE IF NOT EXISTS calendar_dates
 (
     service_id     VARCHAR(255),
     date           date,
@@ -19,7 +19,7 @@ CREATE TABLE calendar_dates
 
 
 -- name: create-table-stops
-CREATE TABLE stops
+CREATE TABLE IF NOT EXISTS stops
 (
     stop_id             VARCHAR(255)  NOT NULL PRIMARY KEY,
     stop_code           VARCHAR(255),
@@ -37,10 +37,10 @@ CREATE TABLE stops
 
 
 -- name: create-table-routes
-CREATE TABLE routes
+CREATE TABLE IF NOT EXISTS routes
 (
     route_id         VARCHAR(255) NOT NULL PRIMARY KEY,
-    agency_id        VARCHAR(255) REFERENCES agency(agency_id),
+    agency_id        VARCHAR(255) references agency (agency_id),
     route_type       VARCHAR(255),
     route_short_name VARCHAR(255),
     route_long_name  VARCHAR(255),
@@ -55,13 +55,13 @@ CREATE INDEX stops_geom ON stops USING GIST (geom);
 
 
 -- name: create-table-stop_times
-CREATE TABLE stop_times
+CREATE TABLE IF NOT EXISTS stop_times
 (
-    trip_id             VARCHAR(255) REFERENCES trips(trip_id),
-    arrival_time        VARCHAR(8)   NOT NULL,
-    departure_time      VARCHAR(8)   NOT NULL,
-    stop_id             VARCHAR(255) REFERENCES stops(stop_id),
-    stop_sequence       INTEGER      NOT NULL,
+    trip_id             VARCHAR(255) REFERENCES trips (trip_id),
+    arrival_time        VARCHAR(8) NOT NULL,
+    departure_time      VARCHAR(8) NOT NULL,
+    stop_id             VARCHAR(255) REFERENCES stops (stop_id),
+    stop_sequence       INTEGER    NOT NULL,
     stop_headsign       VARCHAR(255),
     pickup_type         SMALLINT CHECK (pickup_type BETWEEN 0 AND 3),
     drop_off_type       SMALLINT CHECK (drop_off_type BETWEEN 0 AND 3),
@@ -74,9 +74,9 @@ COMMENT ON COLUMN stop_times.timepoint IS '0 times are considered approximate, 1
 
 
 -- name: create-table-trips
-CREATE TABLE trips
+CREATE TABLE IF NOT EXISTS trips
 (
-    route_id              VARCHAR(255) references routes(route_id),
+    route_id              VARCHAR(255) references routes (route_id),
     service_id            VARCHAR(255) NOT NULL,
     trip_id               VARCHAR(255) NOT NULL PRIMARY KEY,
     trip_headsign         VARCHAR(255),
