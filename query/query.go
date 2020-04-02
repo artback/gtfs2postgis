@@ -38,7 +38,6 @@ func (r *Repository) populateTable(tableName, filePath string, geom bool) error 
 	if err != nil {
 		return err
 	}
-
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -81,18 +80,21 @@ func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) err
 	_, err := tx.Exec(query, args...)
 	return err
 }
-func CopyIn(table string, columns ...string) string {
-	stmt := "COPY tmp_table FROM STDIN"
-	return stmt
+func CopyIn() string {
+	return "COPY tmp_table FROM STDIN"
 }
 
 func createTemptable(table string) string {
 	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table + " WITH NO DATA"
 }
 
+func copyFromTempTable(table string, pk string) string {
+	return "INSERT INTO " + table + " SELECT DISTINCT ON (" + pk + ") * FROM tmp_table ORDER BY (" + pk + ") ON CONFLICT DO NOTHING"
+}
+
 func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, rows [][]string) error {
 	_, err := tx.Exec(createTemptable(tableName))
-	stmt, err := tx.Prepare(CopyIn(tableName, header...))
+	stmt, err := tx.Prepare(CopyIn())
 	if err != nil {
 		return err
 	}
@@ -106,21 +108,21 @@ func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, ro
 				return err
 			}
 		}
-
-		_, err = stmt.Exec(args...)
+		stmt.Exec(args...)
 		if err != nil {
 			return err
 		}
-
 	}
-
 	_, err = stmt.Exec()
 	if err != nil {
 		return err
 	}
 
 	fmt.Println(fmt.Sprintf("%d rows inserted into table \"%s\"", len(rows), tableName))
-
+	_, err = tx.Exec(copyFromTempTable(tableName, header[0]))
+	if err != nil {
+		return err
+	}
 	return stmt.Close()
 }
 
@@ -149,7 +151,7 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	}
 	arg = strings.TrimSpace(arg)
 	switch column {
-	case "stop_lat", "":
+	case "stop_lat", "stop_lon":
 		return strconv.ParseFloat(arg, 8)
 	case "bikes_allowed", "location_type", "wheelchair_accessible", "wheelchair_boarding":
 		return strconv.Atoi(arg)

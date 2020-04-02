@@ -21,18 +21,11 @@ CREATE TABLE IF NOT EXISTS calendar_dates
 -- name: create-table-stops
 CREATE TABLE IF NOT EXISTS stops
 (
-    stop_id             VARCHAR(255)  NOT NULL PRIMARY KEY,
-    stop_code           VARCHAR(255),
-    stop_name           VARCHAR(255)  NOT NULL,
-    stop_desc           VARCHAR(255),
-    stop_lat            DECIMAL(8, 6) NOT NULL,
-    stop_lon            DECIMAL(9, 6) NOT NULL,
-    zone_id             VARCHAR(255),
-    stop_url            VARCHAR(511),
-    location_type       SMALLINT CHECK (location_type BETWEEN 0 AND 1),
-    parent_station      VARCHAR(255),
-    stop_timezone       VARCHAR(255),
-    wheelchair_boarding SMALLINT CHECK (wheelchair_boarding BETWEEN 0 AND 2)
+    stop_id       VARCHAR(255)  NOT NULL PRIMARY KEY,
+    stop_name     VARCHAR(255)  NOT NULL,
+    stop_lat      DECIMAL(8, 6) NOT NULL,
+    stop_lon      DECIMAL(9, 6) NOT NULL,
+    location_type SMALLINT CHECK (location_type BETWEEN 0 AND 1)
 );
 
 

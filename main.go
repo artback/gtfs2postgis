@@ -36,10 +36,10 @@ func main() {
 	}
 	dir := path.Dir(filename)
 
-	if err := DownloadFile("gtfs.zip", "https://transitfeeds.com/p/trafiklab/50/latest/download"); err != nil {
-		panic(err)
-	}
-	Unzip("gtfs.zip", "./gtfs")
+	//if err := DownloadFile("gtfs.zip", "https://transitfeeds.com/p/trafiklab/50/latest/download"); err != nil {
+	//	panic(err)
+	//}
+	//Unzip("gtfs.zip", "./gtfs")
 
 	err := repo.Connect(conf.Database)
 	if err != nil {
