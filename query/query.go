@@ -33,7 +33,7 @@ func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	return err
 }
 
-func (r *Repository) populateTable(tableName, filePath string, geom bool) error {
+func (r *Repository) populateTable(tableName, filePath string) error {
 	rows, err := reader.CSV(filePath)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (r *Repository) populateTable(tableName, filePath string, geom bool) error 
 		return err
 	}
 
-	if geom {
+	if tableName == "stops" {
 		err = r.updateGeom(tx, tableName)
 		if err != nil {
 			tx.Rollback()
@@ -69,32 +69,32 @@ func (r *Repository) populateTable(tableName, filePath string, geom bool) error 
 }
 
 func (r *Repository) PopulateTable(tableName, filePath string) error {
-	return r.populateTable(tableName, filePath, false)
-}
-
-func (r *Repository) PopulateTableGeom(tableName, filePath string) error {
-	return r.populateTable(tableName, filePath, true)
+	return r.populateTable(tableName, filePath)
 }
 
 func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) error {
 	_, err := tx.Exec(query, args...)
 	return err
 }
-func CopyIn() string {
+func CopyIn(table string) string {
 	return "COPY tmp_table FROM STDIN"
 }
-
 func createTemptable(table string) string {
 	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table + " WITH NO DATA"
 }
-
+func alterTempForStop() string {
+	return "ALTER TABLE tmp_table DROP COLUMN geom"
+}
 func copyFromTempTable(table string, pk string) string {
 	return "INSERT INTO " + table + " SELECT DISTINCT ON (" + pk + ") * FROM tmp_table ORDER BY (" + pk + ") ON CONFLICT DO NOTHING"
 }
 
 func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, rows [][]string) error {
 	_, err := tx.Exec(createTemptable(tableName))
-	stmt, err := tx.Prepare(CopyIn())
+	if tableName == "stops" {
+		tx.Exec(queries[goyesql.Tag("drop-geom")])
+	}
+	stmt, err := tx.Prepare(CopyIn(tableName))
 	if err != nil {
 		return err
 	}
@@ -153,8 +153,6 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	switch column {
 	case "stop_lat", "stop_lon":
 		return strconv.ParseFloat(arg, 8)
-	case "bikes_allowed", "location_type", "wheelchair_accessible", "wheelchair_boarding":
-		return strconv.Atoi(arg)
 	default:
 		return arg, nil
 	}
