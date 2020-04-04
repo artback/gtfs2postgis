@@ -3,8 +3,8 @@ package main
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/fdefabricio/gtfs2postgis/config"
-	"github.com/fdefabricio/gtfs2postgis/query"
+	"github.com/artback/gtfs2postgis/config"
+	"github.com/artback/gtfs2postgis/query"
 	"io"
 	"net/http"
 	"os"
@@ -46,19 +46,19 @@ func main() {
 		panic(err)
 	}
 
-	err = repo.PopulateTableGeom("agency", fmt.Sprintf("%s/gtfs/agency.txt", dir))
+	err = repo.PopulateTable("agency", fmt.Sprintf("%s/gtfs/agency.txt", dir))
 	if err != nil {
 		panic(err)
 	}
-	err = repo.PopulateTableGeom("calendar_dates", fmt.Sprintf("%s/gtfs/calendar_dates.txt", dir))
+	err = repo.PopulateTable("calendar_dates", fmt.Sprintf("%s/gtfs/calendar_dates.txt", dir))
 	if err != nil {
 		panic(err)
 	}
-	err = repo.PopulateTableGeom("routes", fmt.Sprintf("%s/gtfs/routes.txt", dir))
+	err = repo.PopulateTable("routes", fmt.Sprintf("%s/gtfs/routes.txt", dir))
 	if err != nil {
 		panic(err)
 	}
-	err = repo.PopulateTableGeom("stops", fmt.Sprintf("%s/gtfs/stops.txt", dir))
+	err = repo.PopulateTable("stops", fmt.Sprintf("%s/gtfs/stops.txt", dir))
 	if err != nil {
 		panic(err)
 	}
