@@ -5,3 +5,5 @@ database:
   password: "allbin"
   port: 5432
   user: "allbin"
+host:
+  url: "https://transitfeeds.com/p/trafiklab/50/latest/download"

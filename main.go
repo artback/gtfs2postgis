@@ -36,7 +36,7 @@ func main() {
 	}
 	dir := path.Dir(filename)
 
-	if err := DownloadFile("gtfs.zip", "https://transitfeeds.com/p/trafiklab/50/latest/download"); err != nil {
+	if err := DownloadFile("gtfs.zip", conf.Host.Url); err != nil {
 		panic(err)
 	}
 	Unzip("gtfs.zip", "./gtfs")
