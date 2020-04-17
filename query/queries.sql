@@ -1,5 +1,5 @@
 -- name: create-table-agency
-CREATE TABLE IF NOT EXISTS agency
+CREATE TABLE agency
 (
     agency_id       VARCHAR(255) NOT NULL PRIMARY KEY,
     agency_name     VARCHAR(255),
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS agency
 );
 
 -- name: create-table-calendar_dates
-CREATE TABLE IF NOT EXISTS calendar_dates
+CREATE TABLE calendar_dates
 (
     service_id     VARCHAR(255),
     date           date,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS calendar_dates
 
 
 -- name: create-table-stops
-CREATE TABLE IF NOT EXISTS stops
+CREATE TABLE stops
 (
     stop_id       VARCHAR(255)  NOT NULL PRIMARY KEY,
     stop_name     VARCHAR(255)  NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS stops
 
 
 -- name: create-table-routes
-CREATE TABLE IF NOT EXISTS routes
+CREATE TABLE routes
 (
     route_id         VARCHAR(255) NOT NULL PRIMARY KEY,
     agency_id        VARCHAR(255) references agency (agency_id),
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS routes
 
 -- name: update-geom-stops
 ALTER TABLE stops
-    ADD COLUMN IF NOT EXISTS geom geometry(Point, 4326);
+    ADD COLUMN geom geometry(Point, 4326);
 UPDATE stops
 SET geom = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat), 4326)
 WHERE geom IS Null;
@@ -50,20 +50,20 @@ CREATE INDEX IF NOT EXISTS stops_geom ON stops USING GIST (geom);
 
 
 -- name: create-table-stop_times
-CREATE TABLE IF NOT EXISTS stop_times
+CREATE TABLE stop_times
 (
     trip_id        VARCHAR(255),
     arrival_time   VARCHAR(8) NOT NULL,
     departure_time VARCHAR(8) NOT NULL,
     stop_id        VARCHAR(255) REFERENCES stops (stop_id),
     stop_sequence  INTEGER    NOT NULL,
-    stop_headsign  VARCHAR(255),
-    pickup_type    SMALLINT
+    pickup_type    SMALLINT,
+    drop_off_type  SMALLINT
 );
 
 
 -- name: create-table-trips
-CREATE TABLE IF NOT EXISTS trips
+CREATE TABLE trips
 (
     route_id        VARCHAR(255) references routes (route_id),
     service_id      VARCHAR(255) NOT NULL,
@@ -75,6 +75,3 @@ CREATE TABLE IF NOT EXISTS trips
 -- name: drop-table
 DROP TABLE IF EXISTS %s;
 
--- name: drop-geom
-ALTER TABLE IF EXISTS tmp_table
-    DROP COLUMN IF EXISTS geom

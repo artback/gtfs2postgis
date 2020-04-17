@@ -42,6 +42,11 @@ func (r *Repository) populateTable(tableName, filePath string) error {
 	if err != nil {
 		return err
 	}
+	_, err = tx.Exec(dropTable(tableName))
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
 	err = r.createTable(tx, tableName)
 	if err != nil {
@@ -79,21 +84,19 @@ func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) err
 func CopyIn(table string) string {
 	return "COPY tmp_table FROM STDIN"
 }
-func createTemptable(table string) string {
-	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table + " WITH NO DATA"
+func createTemptable(table_name string) string {
+	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table_name + " WITH NO DATA"
 }
-func alterTempForStop() string {
-	return "ALTER TABLE tmp_table DROP COLUMN geom"
+func copyFromTempTable(table_name string) string {
+	return "INSERT INTO " + table_name + " SELECT * FROM tmp_table"
 }
-func copyFromTempTable(table string, pk string) string {
-	return "INSERT INTO " + table + " SELECT DISTINCT ON (" + pk + ") * FROM tmp_table ORDER BY (" + pk + ") ON CONFLICT DO NOTHING"
+func dropTable(table_name string) string {
+	return "DROP TABLE " + table_name + " CASCADE"
 }
 
 func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, rows [][]string) error {
 	_, err := tx.Exec(createTemptable(tableName))
-	if tableName == "stops" {
-		tx.Exec(queries[goyesql.Tag("drop-geom")])
-	}
+
 	stmt, err := tx.Prepare(CopyIn(tableName))
 	if err != nil {
 		return err
@@ -119,7 +122,7 @@ func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, ro
 	}
 
 	fmt.Println(fmt.Sprintf("%d rows inserted into table \"%s\"", len(rows), tableName))
-	_, err = tx.Exec(copyFromTempTable(tableName, header[0]))
+	_, err = tx.Exec(copyFromTempTable(tableName))
 	if err != nil {
 		return err
 	}
