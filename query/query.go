@@ -8,6 +8,7 @@ import (
 	"github.com/artback/gtfs2postgis/reader"
 	_ "github.com/lib/pq"
 	"github.com/nleof/goyesql"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -22,14 +23,33 @@ func init() {
 
 func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	passwordArg := ""
-	if len(c.Password) > 0 {
-		passwordArg = "password=" + c.Password
+	pass := os.Getenv("POSTGRES_PASSWORD")
+	if pass == "" {
+		pass = c.Password
 	}
-
+	host := os.Getenv("POSTGRESS_HOST")
+	if host == "" {
+		host = c.Host
+	}
+	port, _ := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
+	if port == 0 {
+		port = c.Port
+	}
+	user := os.Getenv("POSTGRES_USER")
+	if user == "" {
+		user = c.User
+	}
+	db := os.Getenv("POSTGRES_DB")
+	if db == "" {
+		db = c.Database
+	}
+	if len(pass) > 0 {
+		passwordArg = "password=" + pass
+	}
 	var err error
-	r.db, err = sql.Open(c.Driver, fmt.Sprintf("host=%s port=%d user=%s %s dbname=%s sslmode=disable",
-		c.Host, c.Port, c.User, passwordArg, c.Database))
-
+	db_string := fmt.Sprintf("host=%s port=%d user=%s %s dbname=%s sslmode=disable",
+		host, port, user, passwordArg, db)
+	r.db, err = sql.Open(c.Driver, db_string)
 	return err
 }
 
@@ -156,6 +176,20 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	switch column {
 	case "stop_lat", "stop_lon":
 		return strconv.ParseFloat(arg, 8)
+	case "departure_time", "arrival_time":
+		parts := strings.Split(arg, ":")
+		int_parts := []int{}
+		for i, _ := range parts {
+			val, err := strconv.Atoi(parts[i])
+			if err != nil {
+				panic(err)
+			}
+			int_parts = append(int_parts, val)
+		}
+		if int_parts[0] < 4 {
+			int_parts[0] = int_parts[0] + 24
+		}
+		return fmt.Sprintf("%02d:%02d:%02d", int_parts[0], int_parts[1], int_parts[2]), nil
 	default:
 		return arg, nil
 	}
