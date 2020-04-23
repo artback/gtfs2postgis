@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/artback/gtfs2postgis/config"
 	"github.com/artback/gtfs2postgis/filehandling"
 	"github.com/artback/gtfs2postgis/query"
-	"log"
-	"net/http"
+	"github.com/artback/gtfs2postgis/slack"
 	"os"
 )
 
@@ -89,19 +86,5 @@ func main() {
 	}
 	os.RemoveAll("./gtfs")
 	os.Remove("./gtfs.zip")
-	if os.Getenv("SLACK_URL") != "" {
-		message := message{text}
-		data, err := json.Marshal(message)
-		if err != nil {
-			panic(err)
-		}
-		resp, err := http.Post(os.Getenv("SLACK_URL"), "application/json", bytes.NewBuffer(data))
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-type message struct {
-	text string `json:"text"`
+	slack.SendMessage(text)
 }

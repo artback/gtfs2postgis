@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/artback/gtfs2postgis/config"
 	"github.com/artback/gtfs2postgis/reader"
+	"github.com/artback/gtfs2postgis/time"
 	_ "github.com/lib/pq"
 	"github.com/nleof/goyesql"
 	"os"
@@ -101,23 +102,11 @@ func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) err
 	_, err := tx.Exec(query, args...)
 	return err
 }
-func CopyIn(table string) string {
-	return "COPY tmp_table FROM STDIN"
-}
-func createTemptable(table_name string) string {
-	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table_name + " WITH NO DATA"
-}
-func copyFromTempTable(table_name string) string {
-	return "INSERT INTO " + table_name + " SELECT * FROM tmp_table"
-}
-func dropTable(table_name string) string {
-	return "DROP TABLE " + table_name + " CASCADE"
-}
 
 func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, rows [][]string) (*string, error) {
 	_, err := tx.Exec(createTemptable(tableName))
 
-	stmt, err := tx.Prepare(CopyIn(tableName))
+	stmt, err := tx.Prepare(CopyIn())
 	if err != nil {
 		return nil, err
 	}
@@ -178,19 +167,7 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	case "stop_lat", "stop_lon":
 		return strconv.ParseFloat(arg, 8)
 	case "departure_time", "arrival_time":
-		parts := strings.Split(arg, ":")
-		int_parts := []int{}
-		for i, _ := range parts {
-			val, err := strconv.Atoi(parts[i])
-			if err != nil {
-				panic(err)
-			}
-			int_parts = append(int_parts, val)
-		}
-		if int_parts[0] < 4 {
-			int_parts[0] = int_parts[0] + 24
-		}
-		return fmt.Sprintf("%02d:%02d:%02d", int_parts[0], int_parts[1], int_parts[2]), nil
+		return time.AddHoursToTimeString(arg, ":", 24), nil
 	default:
 		return arg, nil
 	}
