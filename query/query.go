@@ -94,8 +94,15 @@ func (r *Repository) populateTable(tableName, filePath string) (*string, error) 
 	return message, err
 }
 
-func (r *Repository) PopulateTable(tableName, filePath string) (*string, error) {
-	return r.populateTable(tableName, filePath)
+func (r *Repository) PopulateTable(tableName, filePath string) string {
+	m, err := r.populateTable(tableName, filePath)
+	if err != nil {
+		panic(err)
+	}
+	if m != nil {
+		return ""
+	}
+	return *m
 }
 
 func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) error {

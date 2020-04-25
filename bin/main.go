@@ -27,64 +27,28 @@ func main() {
 	if err := filehandling.DownloadFile("gtfs.zip", conf.Host.Url); err != nil {
 		panic(err)
 	}
-	_, err := filehandling.Unzip("gtfs.zip", "./gtfs")
-	if err != nil {
+	if _, err := filehandling.Unzip("gtfs.zip", "./gtfs"); err != nil {
 		panic(err)
 	}
 	fmt.Println("GTFS downloaded and unzipped")
-	err = repo.Connect(conf.Database)
-	var text string
-	if err != nil {
+
+	if err := repo.Connect(conf.Database); err != nil {
 		panic(err)
 	}
 
-	line, err := repo.PopulateTable("agency", "./gtfs/agency.txt")
-	if err != nil {
-		panic(err)
-	}
-	if line != nil {
-		text = text + *line + "\n"
-	}
+	text := repo.PopulateTable("agency", "./gtfs/agency.txt") + "\n"
 
-	line, err = repo.PopulateTable("calendar_dates", "./gtfs/calendar_dates.txt")
-	if line != nil {
-		text = text + *line + "\n"
-	}
-	if err != nil {
-		panic(err)
-	}
-	line, err = repo.PopulateTable("routes", "./gtfs/routes.txt")
-	if err != nil {
-		panic(err)
-	}
-	if line != nil {
-		text = text + *line + "\n"
-	}
-	line, err = repo.PopulateTable("stops", "./gtfs/stops.txt")
-	if err != nil {
-		panic(err)
-	}
+	text += repo.PopulateTable("calendar_dates", "./gtfs/calendar_dates.txt") + "\n"
 
-	if line != nil {
-		text = text + *line + "\n"
-	}
-	line, err = repo.PopulateTable("trips", "./gtfs/trips.txt")
-	if err != nil {
-		panic(err)
-	}
+	text += repo.PopulateTable("routes", "./gtfs/routes.txt") + "\n"
 
-	if line != nil {
-		text = text + *line + "\n"
-	}
-	line, err = repo.PopulateTable("stop_times", "./gtfs/stop_times.txt")
-	if err != nil {
-		panic(err)
-	}
+	text += repo.PopulateTable("stops", "./gtfs/stops.txt") + "\n"
 
-	if line != nil {
-		text = text + *line + "\n"
-	}
+	text += repo.PopulateTable("trips", "./gtfs/trips.txt") + "\n"
+
+	text += repo.PopulateTable("stop_times", "./gtfs/stop_times.txt") + "\n"
+	slack.SendMessage(text)
+
 	os.RemoveAll("./gtfs")
 	os.Remove("./gtfs.zip")
-	slack.SendMessage(text)
 }
