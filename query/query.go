@@ -28,7 +28,7 @@ func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	if pass == "" {
 		pass = c.Password
 	}
-	host := os.Getenv("POSTGRESS_HOST")
+	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
 		host = c.Host
 	}
