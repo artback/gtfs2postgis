@@ -1,9 +1,7 @@
 package query
 
 import (
-	"database/sql"
 	"github.com/artback/gtfs2postgis/time"
-	"github.com/nleof/goyesql"
 	"strconv"
 	"strings"
 )
@@ -21,8 +19,4 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	default:
 		return arg, nil
 	}
-}
-
-func (r *Repository) updateGeom(tx *sql.Tx, tableName string) error {
-	return r.runQuery(tx, queries[goyesql.Tag("update-geom-"+tableName)])
 }

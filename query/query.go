@@ -163,3 +163,7 @@ func (r *Repository) loadTable(tx *sql.Tx, tableName string, rows [][]string) (*
 
 	return r.runCopyIn(tx, tableName, header, rows[1:])
 }
+
+func (r *Repository) updateGeom(tx *sql.Tx, tableName string) error {
+	return r.runQuery(tx, queries[goyesql.Tag("update-geom-"+tableName)])
+}
