@@ -63,4 +63,6 @@ jobs:
     # Push the Docker images to Google Container Registry
     - name: Publish
       run: |
+        docker tag "$IMAGE_BASE"/go-gtfs-import:"$GITHUB_SHA" "$IMAGE_BASE"/go-gtfs-import
         docker push "$IMAGE_BASE"/go-gtfs-import:"$GITHUB_SHA"
+        docker push "$IMAGE_BASE"/go-gtfs-import
