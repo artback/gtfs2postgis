@@ -1,4 +1,4 @@
-package main
+package importer
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ func init() {
 	}
 }
 
-func main() {
+func Run() {
 	if err := repo.Connect(conf.Database); err != nil {
 		panic(err)
 	}
@@ -36,19 +36,14 @@ func main() {
 	}
 	fmt.Println("GTFS downloaded and unzipped")
 
-	text := repo.PopulateTable("agency", "./gtfs/agency.txt") + "\n"
+	text := repo.PopulateTable("agency", "./gtfs/agency.txt") +
+		repo.PopulateTable("calendar_dates", "./gtfs/calendar_dates.txt") +
+		repo.PopulateTable("routes", "./gtfs/routes.txt") +
+		repo.PopulateTable("stops", "./gtfs/stops.txt") +
+		repo.PopulateTable("trips", "./gtfs/trips.txt") +
+		repo.PopulateTable("stop_times", "./gtfs/stop_times.txt")
 
-	text += repo.PopulateTable("calendar_dates", "./gtfs/calendar_dates.txt") + "\n"
-
-	text += repo.PopulateTable("routes", "./gtfs/routes.txt") + "\n"
-
-	text += repo.PopulateTable("stops", "./gtfs/stops.txt") + "\n"
-
-	text += repo.PopulateTable("trips", "./gtfs/trips.txt") + "\n"
-
-	text += repo.PopulateTable("stop_times", "./gtfs/stop_times.txt") + "\n"
 	slack.SendMessage(text)
-
 	os.RemoveAll("./gtfs")
 	os.Remove("./gtfs.zip")
 }

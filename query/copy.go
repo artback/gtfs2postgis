@@ -10,5 +10,5 @@ func copyFromTempTable(table_name string) string {
 	return "INSERT INTO " + table_name + " SELECT * FROM tmp_table"
 }
 func dropTable(table_name string) string {
-	return "DROP TABLE " + table_name + " CASCADE"
+	return "DROP TABLE IF EXISTS " + table_name + " CASCADE"
 }

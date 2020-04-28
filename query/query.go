@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/artback/gtfs2postgis/config"
 	"github.com/artback/gtfs2postgis/reader"
-	"github.com/artback/gtfs2postgis/time"
 	_ "github.com/lib/pq"
 	"github.com/nleof/goyesql"
 	"os"
@@ -51,9 +50,9 @@ func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	db_string := fmt.Sprintf("host=%s port=%d user=%s %s dbname=%s sslmode=disable",
 		host, port, user, passwordArg, db)
 	r.db, err = sql.Open(c.Driver, db_string)
-  if (err != nil) {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 	return r.db.Ping()
 }
 
@@ -63,6 +62,7 @@ func (r *Repository) populateTable(tableName, filePath string) (*string, error) 
 		return nil, err
 	}
 	tx, err := r.db.Begin()
+
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +103,9 @@ func (r *Repository) PopulateTable(tableName, filePath string) string {
 		panic(err)
 	}
 	if m != nil {
-		return ""
+		return fmt.Sprintln(*m)
 	}
-	return *m
+	return ""
 }
 
 func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) error {
@@ -162,23 +162,4 @@ func (r *Repository) loadTable(tx *sql.Tx, tableName string, rows [][]string) (*
 	header[0] = strings.TrimPrefix(header[0], "\uFEFF")
 
 	return r.runCopyIn(tx, tableName, header, rows[1:])
-}
-
-func (r *Repository) updateGeom(tx *sql.Tx, tableName string) error {
-	return r.runQuery(tx, queries[goyesql.Tag("update-geom-"+tableName)])
-}
-
-func convertColumnType(column, arg string) (interface{}, error) {
-	if len(arg) == 0 {
-		return nil, nil
-	}
-	arg = strings.TrimSpace(arg)
-	switch column {
-	case "stop_lat", "stop_lon":
-		return strconv.ParseFloat(arg, 8)
-	case "departure_time", "arrival_time":
-		return time.AddHoursToTimeString(arg, ":", 24), nil
-	default:
-		return arg, nil
-	}
 }
