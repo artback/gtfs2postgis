@@ -24,6 +24,10 @@ func init() {
 }
 
 func main() {
+	if err := repo.Connect(conf.Database); err != nil {
+		panic(err)
+	}
+
 	if err := filehandling.DownloadFile("gtfs.zip", conf.Host.Url); err != nil {
 		panic(err)
 	}
@@ -31,10 +35,6 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("GTFS downloaded and unzipped")
-
-	if err := repo.Connect(conf.Database); err != nil {
-		panic(err)
-	}
 
 	text := repo.PopulateTable("agency", "./gtfs/agency.txt") + "\n"
 
