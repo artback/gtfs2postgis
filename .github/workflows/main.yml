@@ -35,7 +35,7 @@ jobs:
     - run: go test ./...
     - run: pwd
     - run: ls
-    - run: go build -o bin/main bin/main.go
+    - run: go build -o bin/main cmd/main.go
 
 
     # Setup gcloud CLI
