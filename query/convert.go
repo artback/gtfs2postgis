@@ -1,7 +1,7 @@
 package query
 
 import (
-	"github.com/artback/gtfs2postgis/time"
+	"github.com/allbin/gtfs2postgis/time"
 	"strconv"
 	"strings"
 )
