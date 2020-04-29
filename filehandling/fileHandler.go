@@ -11,8 +11,8 @@ import (
 )
 
 func DownloadFile(filepath string, url string) error {
-
 	// Get the data
+	fmt.Printf("Downloading from %s ", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return err

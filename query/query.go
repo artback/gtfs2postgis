@@ -142,12 +142,13 @@ func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, ro
 		return nil, err
 	}
 
-	inserted := fmt.Sprintf("%d rows inserted into table \"%s\"", len(rows), tableName)
-	fmt.Println(inserted)
 	_, err = tx.Exec(copyFromTempTable(tableName))
 	if err != nil {
 		return nil, err
 	}
+
+	inserted := fmt.Sprintf("%d rows inserted into table \"%s\"", len(rows), tableName)
+	fmt.Println(inserted)
 	return &inserted, stmt.Close()
 }
 

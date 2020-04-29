@@ -27,7 +27,6 @@ func Run() {
 	if err := repo.Connect(conf.Database); err != nil {
 		panic(err)
 	}
-
 	if err := filehandling.DownloadFile("gtfs.zip", conf.Host.Url); err != nil {
 		panic(err)
 	}
