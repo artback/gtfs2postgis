@@ -1,4 +1,4 @@
-module github.com/artback/gtfs2postgis
+module github.com/allbin/gtfs2postgis
 
 go 1.14
 

@@ -2,10 +2,10 @@ package importer
 
 import (
 	"fmt"
-	"github.com/artback/gtfs2postgis/config"
-	"github.com/artback/gtfs2postgis/filehandling"
-	"github.com/artback/gtfs2postgis/query"
-	"github.com/artback/gtfs2postgis/slack"
+	"github.com/allbin/gtfs2postgis/config"
+	"github.com/allbin/gtfs2postgis/filehandling"
+	"github.com/allbin/gtfs2postgis/query"
+	"github.com/allbin/gtfs2postgis/slack"
 	"os"
 )
 
