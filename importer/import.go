@@ -35,7 +35,10 @@ func Run() {
 		panic(err)
 	}
 	fmt.Println("GTFS downloaded and unzipped")
-
+	_, err := repo.CreatePostgis()
+	if err != nil {
+		panic(err)
+	}
 	text := repo.PopulateTable("agency", "./gtfs/agency.txt") +
 		repo.PopulateTable("calendar_dates", "./gtfs/calendar_dates.txt") +
 		repo.PopulateTable("routes", "./gtfs/routes.txt") +

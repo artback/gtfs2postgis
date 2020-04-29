@@ -55,7 +55,9 @@ func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	}
 	return r.db.Ping()
 }
-
+func (r *Repository) CreatePostgis() (sql.Result, error) {
+	return r.db.Exec(queries[goyesql.Tag("create-postgis")])
+}
 func (r *Repository) populateTable(tableName, filePath string) (*string, error) {
 	rows, err := reader.CSV(filePath)
 	if err != nil {

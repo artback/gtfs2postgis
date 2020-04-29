@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: go-gtfs-query-import
+  name: go-gtfs-query-import
+  namespace: gtfs-query
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-gtfs-query-import
+  template:
+    metadata:
+      labels:
+        app: go-gtfs-query-import
+    spec:
+      restartPolicy: Always
+      containers:
+        - image: eu.gcr.io/allbinary-204807/gtfs/go-gtfs-import
+          name: go-gtfs-query-import
+          envFrom:
+            - secretRef:
+                name: go-gtfs-query-import-secrets
+        - image: gcr.io/cloudsql-docker/gce-proxy
+          name: cloudsql-proxy
+          command:
+            [
+              "/cloud_sql_proxy",
+              "-instances=allbinary-204807:europe-west3:transport-gtfs=tcp:5432",
+              "-credential_file=/secrets/cloudsql/credentials.json",
+            ]
+          securityContext:
+            runAsUser: 2
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloud-sql-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+      volumes:
+        - name: cloud-sql-credentials
+          secret:
+            defaultMode: 420
+            secretName: cloudsql-transport-credentials
