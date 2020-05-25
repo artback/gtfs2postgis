@@ -44,8 +44,9 @@ func Run() {
 		repo.PopulateTable("stops", "./gtfs/stops.txt") +
 		repo.PopulateTable("trips", "./gtfs/trips.txt") +
 		repo.PopulateTable("stop_times", "./gtfs/stop_times.txt")
+	s := slack.Slack{Url: conf.Slack.Url}
+	s.Send(text)
 
-	slack.SendMessage(text)
 	os.RemoveAll("./gtfs")
 	os.Remove("./gtfs.zip")
 }

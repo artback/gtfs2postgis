@@ -8,8 +8,6 @@ import (
 	"github.com/allbin/gtfs2postgis/reader"
 	_ "github.com/lib/pq"
 	"github.com/nleof/goyesql"
-	"os"
-	"strconv"
 	"strings"
 )
 
@@ -23,33 +21,13 @@ func init() {
 
 func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	passwordArg := ""
-	pass := os.Getenv("POSTGRES_PASSWORD")
-	if pass == "" {
-		pass = c.Password
-	}
-	host := os.Getenv("POSTGRES_HOST")
-	if host == "" {
-		host = c.Host
-	}
-	port, _ := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
-	if port == 0 {
-		port = c.Port
-	}
-	user := os.Getenv("POSTGRES_USER")
-	if user == "" {
-		user = c.User
-	}
-	db := os.Getenv("POSTGRES_DB")
-	if db == "" {
-		db = c.Database
-	}
-	if len(pass) > 0 {
-		passwordArg = "password=" + pass
+	if len(c.Password) > 0 {
+		passwordArg = "password=" + c.Password
 	}
 	var err error
-	db_string := fmt.Sprintf("host=%s port=%d user=%s %s dbname=%s sslmode=disable",
-		host, port, user, passwordArg, db)
-	r.db, err = sql.Open(c.Driver, db_string)
+	dbString := fmt.Sprintf("host=%s port=%d user=%s %s dbname=%s sslmode=disable",
+		c.Host, c.Port, c.User, passwordArg, c.Database)
+	r.db, err = sql.Open(c.Driver, dbString)
 	if err != nil {
 		return err
 	}
