@@ -1,4 +1,4 @@
-package slack
+package message
 
 import (
 	"bytes"
@@ -6,12 +6,11 @@ import (
 	"net/http"
 )
 
-type Slack struct {
+type Service struct {
 	Url string
 }
 
-func (s Slack) Send(text string) (*http.Response, error) {
-	message := Message{text}
+func (s Service) Send(message interface{}) (*http.Response, error) {
 	data, err := json.Marshal(message)
 	if err != nil {
 		panic(err)
@@ -19,6 +18,6 @@ func (s Slack) Send(text string) (*http.Response, error) {
 	return http.Post(s.Url, "application/json", bytes.NewBuffer(data))
 }
 
-type Message struct {
+type SlackMessage struct {
 	Text string `json:"text"`
 }

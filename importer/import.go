@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/allbin/gtfs2postgis/config"
 	"github.com/allbin/gtfs2postgis/filehandling"
+	"github.com/allbin/gtfs2postgis/message"
 	"github.com/allbin/gtfs2postgis/query"
-	"github.com/allbin/gtfs2postgis/slack"
 	"os"
 )
 
@@ -44,8 +44,10 @@ func Run() {
 		repo.PopulateTable("stops", "./gtfs/stops.txt") +
 		repo.PopulateTable("trips", "./gtfs/trips.txt") +
 		repo.PopulateTable("stop_times", "./gtfs/stop_times.txt")
-	s := slack.Slack{Url: conf.Slack.Url}
-	s.Send(text)
+
+	s := message.Service{Url: conf.Slack.Url}
+	m := message.SlackMessage{Text: text}
+	s.Send(m)
 
 	os.RemoveAll("./gtfs")
 	os.Remove("./gtfs.zip")
