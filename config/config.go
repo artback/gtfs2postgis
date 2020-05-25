@@ -8,11 +8,11 @@ const filePath = "config/config.yaml"
 
 type Configuration struct {
 	Database DatabaseConfiguration `yaml:"database"`
-	Host     HostConfiguration     `yaml:host`
-	Slack    SlackConfiguration
+	Host     HostConfiguration     `yaml:"host"`
+	Slack    SlackConfiguration    `yaml:"slack"`
 }
 type HostConfiguration struct {
-	Url string `yaml:url`
+	Url string `yaml:"url"`
 }
 
 type DatabaseConfiguration struct {
@@ -30,6 +30,6 @@ type SlackConfiguration struct {
 var c *Configuration
 
 func Init(co *Configuration) error {
-	err := cleanenv.ReadConfig("config/config.yaml", co)
+	err := cleanenv.ReadConfig(filePath, co)
 	return err
 }
