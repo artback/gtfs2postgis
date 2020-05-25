@@ -38,12 +38,12 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
-	text := repo.PopulateTable("agency", "./gtfs/agency.txt") +
-		repo.PopulateTable("calendar_dates", "./gtfs/calendar_dates.txt") +
-		repo.PopulateTable("routes", "./gtfs/routes.txt") +
-		repo.PopulateTable("stops", "./gtfs/stops.txt") +
-		repo.PopulateTable("trips", "./gtfs/trips.txt") +
-		repo.PopulateTable("stop_times", "./gtfs/stop_times.txt")
+	text := repo.PopulateTable("./gtfs/agency.txt") +
+		repo.PopulateTable("./gtfs/calendar_dates.txt") +
+		repo.PopulateTable("./gtfs/routes.txt") +
+		repo.PopulateTable("./gtfs/stops.txt") +
+		repo.PopulateTable("./gtfs/trips.txt") +
+		repo.PopulateTable("./gtfs/stop_times.txt")
 
 	s := message.Service{Url: conf.Slack.Url}
 	m := message.SlackMessage{Text: text}

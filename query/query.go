@@ -77,7 +77,9 @@ func (r *Repository) populateTable(tableName, filePath string) (*string, error) 
 	return message, err
 }
 
-func (r *Repository) PopulateTable(tableName, filePath string) string {
+func (r *Repository) PopulateTable(filePath string) string {
+	s := strings.Split(filePath, "/")
+	tableName := strings.Split(s[len(s)-1], ".")[0]
 	m, err := r.populateTable(tableName, filePath)
 	if err != nil {
 		panic(err)

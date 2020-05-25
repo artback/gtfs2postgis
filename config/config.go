@@ -27,9 +27,6 @@ type SlackConfiguration struct {
 	Url string `yaml:"url" env:"SLACK_URL"`
 }
 
-var c *Configuration
-
 func Init(co *Configuration) error {
-	err := cleanenv.ReadConfig(filePath, co)
-	return err
+	return cleanenv.ReadConfig(filePath, co)
 }
