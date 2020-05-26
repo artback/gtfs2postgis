@@ -9,6 +9,17 @@ import (
 	"os"
 )
 
+const gtfsBase = "./gtfs/"
+const gtfsZip = "gtfs.zip"
+
+var fileNames = []string{
+	"agency.txt",
+	"calendar_dates.txt",
+	"routes.txt",
+	"stops.txt",
+	"trips.txt",
+	"stop_times.txt",
+}
 var (
 	conf *config.Configuration
 	repo *query.Repository
@@ -27,28 +38,32 @@ func Run() {
 	if err := repo.Connect(conf.Database); err != nil {
 		panic(err)
 	}
-	if err := filehandling.DownloadFile("gtfs.zip", conf.Host.Url); err != nil {
+	if err := filehandling.DownloadFile(gtfsZip, conf.Host.Url); err != nil {
 		panic(err)
 	}
-	if _, err := filehandling.Unzip("gtfs.zip", "./gtfs"); err != nil {
+	defer os.Remove(gtfsZip)
+
+	if _, err := filehandling.Unzip(gtfsZip, gtfsBase); err != nil {
 		panic(err)
 	}
+	defer os.RemoveAll(gtfsBase)
+
 	fmt.Println("GTFS downloaded and unzipped")
-	_, err := repo.CreatePostgis()
-	if err != nil {
+
+	if _, err := repo.CreatePostgis(); err != nil {
 		panic(err)
 	}
-	text := repo.PopulateTable("./gtfs/agency.txt") +
-		repo.PopulateTable("./gtfs/calendar_dates.txt") +
-		repo.PopulateTable("./gtfs/routes.txt") +
-		repo.PopulateTable("./gtfs/stops.txt") +
-		repo.PopulateTable("./gtfs/trips.txt") +
-		repo.PopulateTable("./gtfs/stop_times.txt")
+
+	var text string
+	for _, file := range fileNames {
+		if t, err := repo.PopulateTable(gtfsBase + file); err != nil {
+			panic(err)
+		} else if t != nil {
+			text += *t
+		}
+	}
 
 	s := message.Service{Url: conf.Slack.Url}
 	m := message.SlackMessage{Text: text}
 	s.Send(m)
-
-	os.RemoveAll("./gtfs")
-	os.Remove("./gtfs.zip")
 }

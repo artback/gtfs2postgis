@@ -15,7 +15,7 @@ func convertColumnType(column, arg string) (interface{}, error) {
 	case "stop_lat", "stop_lon":
 		return strconv.ParseFloat(arg, 8)
 	case "departure_time", "arrival_time":
-		return time.AddHoursToTimeString(arg, ":", 24), nil
+		return time.AddHoursToTimeString(arg, ":", 24)
 	default:
 		return arg, nil
 	}

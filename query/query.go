@@ -77,17 +77,10 @@ func (r *Repository) populateTable(tableName, filePath string) (*string, error) 
 	return message, err
 }
 
-func (r *Repository) PopulateTable(filePath string) string {
+func (r *Repository) PopulateTable(filePath string) (*string, error) {
 	s := strings.Split(filePath, "/")
 	tableName := strings.Split(s[len(s)-1], ".")[0]
-	m, err := r.populateTable(tableName, filePath)
-	if err != nil {
-		panic(err)
-	}
-	if m != nil {
-		return fmt.Sprintln(*m)
-	}
-	return ""
+	return r.populateTable(tableName, filePath)
 }
 
 func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) error {
