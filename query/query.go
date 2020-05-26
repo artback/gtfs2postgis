@@ -11,15 +11,13 @@ import (
 	"strings"
 )
 
-type Repository struct{ db *sql.DB }
-
-var queries goyesql.Queries
-
-func init() {
-	queries = goyesql.MustParseFile("./query/queries.sql")
+type Repository struct {
+	db      *sql.DB
+	queries goyesql.Queries
 }
 
 func (r *Repository) Connect(c config.DatabaseConfiguration) error {
+	r.queries = goyesql.MustParseFile("./query/queries.sql")
 	passwordArg := ""
 	if len(c.Password) > 0 {
 		passwordArg = "password=" + c.Password
@@ -34,7 +32,7 @@ func (r *Repository) Connect(c config.DatabaseConfiguration) error {
 	return r.db.Ping()
 }
 func (r *Repository) CreatePostgis() (sql.Result, error) {
-	return r.db.Exec(queries[goyesql.Tag("create-postgis")])
+	return r.db.Exec(r.queries[goyesql.Tag("create-postgis")])
 }
 func (r *Repository) populateTable(tableName, filePath string) (*string, error) {
 	rows, err := reader.CSV(filePath)
@@ -125,7 +123,7 @@ func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, ro
 }
 
 func (r *Repository) createTable(tx *sql.Tx, tableName string) error {
-	return r.runQuery(tx, queries[goyesql.Tag("create-table-"+tableName)])
+	return r.runQuery(tx, r.queries[goyesql.Tag("create-table-"+tableName)])
 }
 
 func (r *Repository) loadTable(tx *sql.Tx, tableName string, rows [][]string) (*string, error) {
@@ -140,5 +138,5 @@ func (r *Repository) loadTable(tx *sql.Tx, tableName string, rows [][]string) (*
 }
 
 func (r *Repository) updateGeom(tx *sql.Tx, tableName string) error {
-	return r.runQuery(tx, queries[goyesql.Tag("update-geom-"+tableName)])
+	return r.runQuery(tx, r.queries[goyesql.Tag("update-geom-"+tableName)])
 }

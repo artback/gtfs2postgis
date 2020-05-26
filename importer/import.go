@@ -20,21 +20,13 @@ var fileNames = []string{
 	"trips.txt",
 	"stop_times.txt",
 }
-var (
-	conf *config.Configuration
-	repo *query.Repository
-)
-
-func init() {
-	conf = new(config.Configuration)
-	repo = new(query.Repository)
-	err := config.Init(conf)
-	if err != nil {
-		panic(err)
-	}
-}
 
 func Run() {
+	conf := new(config.Configuration)
+	repo := new(query.Repository)
+	if err := config.Init(conf); err != nil {
+		panic(err)
+	}
 	if err := repo.Connect(conf.Database); err != nil {
 		panic(err)
 	}
@@ -61,11 +53,11 @@ func Run() {
 
 	var text string
 	for _, file := range fileNames {
-		if t, err := repo.PopulateTable(gtfsBase + file); err != nil {
+		if t, err := repo.PopulateTable(gtfsDest + file); err != nil {
 			panic(err)
 		} else if t != nil {
 			text += *t
-			fmt.Println(t)
+			fmt.Println(*t)
 		}
 	}
 
