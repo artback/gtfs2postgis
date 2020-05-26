@@ -10,31 +10,31 @@ import (
 	"strings"
 )
 
-func DownloadFile(filepath string, url string) error {
-	// Get the data
-	fmt.Printf("Downloading from %s\n", url)
+type File struct {
+	Path string
+}
+
+func (src File) LoadDataFrom(url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	// Create the file
-	out, err := os.Create(filepath)
+	out, err := os.Create(src.Path)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 
-	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
 }
-func Unzip(src string, dest string) ([]string, error) {
+func (src File) Unzip(dest string) ([]string, error) {
 
 	var filenames []string
 
-	r, err := zip.OpenReader(src)
+	r, err := zip.OpenReader(src.Path)
 	if err != nil {
 		return filenames, err
 	}
@@ -42,10 +42,8 @@ func Unzip(src string, dest string) ([]string, error) {
 
 	for _, f := range r.File {
 
-		// Store filename/path for returning and using later on
 		fpath := filepath.Join(dest, f.Name)
 
-		// Check for ZipSlip. More Info: http://bit.ly/2MsjAWE
 		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
 			return filenames, fmt.Errorf("%s: illegal file path", fpath)
 		}
@@ -58,7 +56,6 @@ func Unzip(src string, dest string) ([]string, error) {
 			continue
 		}
 
-		// Make File
 		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
 			return filenames, err
 		}
@@ -75,7 +72,6 @@ func Unzip(src string, dest string) ([]string, error) {
 
 		_, err = io.Copy(outFile, rc)
 
-		// Close the file without defer to close before next iteration of loop
 		outFile.Close()
 		rc.Close()
 

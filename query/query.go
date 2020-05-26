@@ -121,7 +121,6 @@ func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, ro
 	}
 
 	inserted := fmt.Sprintf("%d rows inserted into table \"%s\"", len(rows), tableName)
-	fmt.Println(inserted)
 	return &inserted, stmt.Close()
 }
 

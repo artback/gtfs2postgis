@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-const gtfsBase = "./gtfs/"
+const gtfsDest = "./gtfs/"
 const gtfsZip = "gtfs.zip"
 
 var fileNames = []string{
@@ -38,15 +38,20 @@ func Run() {
 	if err := repo.Connect(conf.Database); err != nil {
 		panic(err)
 	}
-	if err := filehandling.DownloadFile(gtfsZip, conf.Host.Url); err != nil {
+
+	fmt.Printf("Downloading from %s\n", conf.Host.Url)
+	file := filehandling.File{
+		Path: gtfsZip,
+	}
+	if err := file.LoadDataFrom(conf.Host.Url); err != nil {
 		panic(err)
 	}
 	defer os.Remove(gtfsZip)
 
-	if _, err := filehandling.Unzip(gtfsZip, gtfsBase); err != nil {
+	if _, err := file.Unzip(gtfsDest); err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(gtfsBase)
+	defer os.RemoveAll(gtfsDest)
 
 	fmt.Println("GTFS downloaded and unzipped")
 
@@ -60,6 +65,7 @@ func Run() {
 			panic(err)
 		} else if t != nil {
 			text += *t
+			fmt.Println(t)
 		}
 	}
 
