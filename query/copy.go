@@ -1,14 +1,19 @@
 package query
 
-func CopyIn() string {
-	return "COPY tmp_table FROM STDIN"
+import (
+	"database/sql"
+	"fmt"
+)
+
+func copyIn(tx *sql.Tx) (*sql.Stmt, error) {
+	return tx.Prepare("COPY tmp_table FROM STDIN")
 }
-func createTemptable(table_name string) string {
-	return "CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM " + table_name + " WITH NO DATA"
+func createTemptable(tx *sql.Tx, tableName string) (sql.Result, error) {
+	return tx.Exec(fmt.Sprintf("CREATE TEMP TABLE tmp_table ON COMMIT DROP AS SELECT * FROM %s WITH NO DATA", tableName))
 }
-func copyFromTempTable(table_name string) string {
-	return "INSERT INTO " + table_name + " SELECT * FROM tmp_table"
+func copyFromTempTable(tx *sql.Tx, tableName string) (sql.Result, error) {
+	return tx.Exec(fmt.Sprintf("INSERT INTO %s SELECT * FROM tmp_table", tableName))
 }
-func dropTable(table_name string) string {
-	return "DROP TABLE IF EXISTS " + table_name + " CASCADE"
+func dropTable(tx *sql.Tx, tableName string) (sql.Result, error) {
+	return tx.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", tableName))
 }
