@@ -11,13 +11,15 @@ import (
 	"strings"
 )
 
+const sqlFile = "./query/queries.sql"
+
 type Repository struct {
 	db      *sql.DB
 	queries goyesql.Queries
 }
 
 func (r *Repository) Connect(c config.DatabaseConfiguration) error {
-	r.queries = goyesql.MustParseFile("./query/queries.sql")
+	r.queries = goyesql.MustParseFile(sqlFile)
 	passwordArg := ""
 	if len(c.Password) > 0 {
 		passwordArg = "password=" + c.Password
