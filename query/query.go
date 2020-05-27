@@ -44,7 +44,9 @@ func (r *Repository) populateTable(tableName, filePath string) (*string, error) 
 	if err != nil {
 		return nil, err
 	}
-	_, err = tx.Exec(dropTable(tableName))
+	if _, err := dropTable(tx, tableName); err != nil {
+		return nil, err
+	}
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -87,9 +89,8 @@ func (r *Repository) runQuery(tx *sql.Tx, query string, args ...interface{}) err
 }
 
 func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, rows [][]string) (*string, error) {
-	_, err := tx.Exec(createTemptable(tableName))
-
-	stmt, err := tx.Prepare(CopyIn())
+	createTemptable(tx, tableName)
+	stmt, err := copyIn(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -103,21 +104,16 @@ func (r *Repository) runCopyIn(tx *sql.Tx, tableName string, header []string, ro
 				return nil, err
 			}
 		}
-		stmt.Exec(args...)
-		if err != nil {
+		if _, err := stmt.Exec(args...); err != nil {
 			return nil, err
 		}
 	}
-	_, err = stmt.Exec()
-	if err != nil {
+	if _, err = stmt.Exec(); err != nil {
 		return nil, err
 	}
-
-	_, err = tx.Exec(copyFromTempTable(tableName))
-	if err != nil {
+	if _, err = copyFromTempTable(tx, tableName); err != nil {
 		return nil, err
 	}
-
 	inserted := fmt.Sprintf("%d rows inserted into table \"%s\"", len(rows), tableName)
 	return &inserted, stmt.Close()
 }
